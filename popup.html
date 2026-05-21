@@ -4,26 +4,83 @@
 <meta charset="utf-8">
 <title>מעקב התנהגות</title>
 <style>
-body { font-family: 'Heebo', Arial, sans-serif; margin: 0; padding: 14px; width: 280px; direction: rtl; color: #1f2937; }
-h3 { margin: 0 0 12px; color: #0066cc; font-size: 16px; }
-.btn { display: block; width: 100%; padding: 10px; margin-bottom: 6px; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 6px; text-align: right; cursor: pointer; font-size: 13px; color: #1f2937; }
-.btn:hover { background: #e0f2fe; border-color: #0066cc; }
-.btn.primary { background: #0066cc; color: #fff; border-color: #0066cc; }
-.btn.primary:hover { background: #0052a3; }
-.status { background: #f0f9ff; padding: 8px; border-radius: 6px; font-size: 12px; margin-bottom: 10px; border: 1px solid #bae6fd; }
-.mini { color: #6b7280; font-size: 11px; }
-.err { color: #dc2626; }
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: 'Heebo', Arial, sans-serif;
+  direction: rtl;
+  color: #1f2937;
+  width: 760px;
+  height: 580px;
+  display: flex;
+  flex-direction: column;
+}
+.topbar {
+  background: linear-gradient(135deg, #0066cc 0%, #007aff 100%);
+  color: #fff;
+  padding: 8px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+.topbar h3 { margin: 0; font-size: 14px; font-weight: 600; }
+.tabs { display: flex; gap: 4px; }
+.tab {
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  border: 0;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.tab:hover { background: rgba(255,255,255,0.3); }
+.tab.active { background: #fff; color: #0066cc; font-weight: 600; }
+.actions { display: flex; gap: 4px; }
+.action-btn {
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  border: 0;
+  padding: 5px 8px;
+  border-radius: 5px;
+  font-size: 11px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.action-btn:hover { background: rgba(255,255,255,0.3); }
+.status {
+  padding: 4px 12px;
+  background: #f0f9ff;
+  border-bottom: 1px solid #bae6fd;
+  font-size: 11px;
+  color: #075985;
+}
+.status.err { background: #fef2f2; color: #dc2626; border-color: #fecaca; }
+#frame {
+  flex: 1;
+  border: 0;
+  width: 100%;
+}
 </style>
 </head>
 <body>
-<h3>🎓 מעקב התנהגות - בית התלמוד</h3>
+<div class="topbar">
+  <h3>🎓 מעקב התנהגות</h3>
+  <div class="tabs">
+    <button class="tab" data-tab="events">📋 אירועים</button>
+    <button class="tab" data-tab="forms">📝 חתימות</button>
+    <button class="tab" data-tab="tasks">✅ משימות</button>
+    <button class="tab" data-tab="card">👤 כרטיס תלמיד</button>
+  </div>
+  <div class="actions">
+    <button class="action-btn" id="refresh" title="רענן">⟳</button>
+    <button class="action-btn" id="open-tab" title="פתח בלשונית חדשה">🌐</button>
+  </div>
+</div>
 <div class="status" id="status">בודק חיבור...</div>
-<button class="btn primary" id="open-site">פתח את האתר המלא</button>
-<button class="btn" id="behavior">מעקב התנהגות</button>
-<button class="btn" id="forms">חתימות הורים</button>
-<button class="btn" id="tasks">משימות</button>
-<button class="btn" id="card">כרטיס תלמיד</button>
-<button class="btn" id="phone-info">קו טלפוני /8</button>
+<iframe id="frame" src="about:blank"></iframe>
 <script src="popup.js"></script>
 </body>
 </html>
