@@ -194,11 +194,21 @@
     try {
       const ctrl = new AbortController();
       const timer = setTimeout(() => ctrl.abort(), 10000);
-      const r = await fetch(APPS_SCRIPT + '?action=ping&token=' + TOKEN, { signal: ctrl.signal });
+      const r = await fetch(APPS_SCRIPT + '?action=bhtCounts&token=' + TOKEN, { signal: ctrl.signal });
       clearTimeout(timer);
       const d = await r.json();
-      const t = new Date(d.time).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
-      statsEl.innerHTML = `<div class="bht-ok">✓ מחובר</div><div class="bht-mini">${d.user || ''} · ${t}</div>`;
+      const total = (d.pendingEvents||0) + (d.overdueTasks||0) + (d.pendingSigs||0);
+      statsEl.innerHTML = `<div class="bht-ok">✓ מחובר</div><div class="bht-mini">📋 ${d.pendingEvents||0} ממתינים · ⏰ ${d.overdueTasks||0} פגי תוקף · 📝 ${d.pendingSigs||0} חתימות</div>`;
+      // Update FAB badge
+      const fabEl = container.querySelector('#bht-fab');
+      let badge = fabEl.querySelector('.bht-fab-count');
+      if (!badge) {
+        badge = document.createElement('span');
+        badge.className = 'bht-fab-count';
+        fabEl.appendChild(badge);
+      }
+      if (total > 0) { badge.textContent = total; badge.style.display = 'flex'; }
+      else { badge.style.display = 'none'; }
     } catch (e) {
       statsEl.innerHTML = `<div class="bht-err">✗ לא מחובר</div><div class="bht-mini">${(e.message||e).toString().substring(0,40)}</div>`;
     }
