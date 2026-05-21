@@ -1,0 +1,137 @@
+#bht-fab {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, #0066cc 0%, #007aff 100%);
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+  z-index: 999999;
+  transition: transform .2s, box-shadow .2s;
+  font-family: 'Heebo', Arial, sans-serif;
+}
+
+#bht-fab:hover {
+  transform: scale(1.08);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+}
+
+#bht-panel {
+  position: fixed;
+  bottom: 90px;
+  left: 24px;
+  width: 340px;
+  max-height: 70vh;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+  z-index: 999998;
+  display: none;
+  overflow: hidden;
+  direction: rtl;
+  font-family: 'Heebo', Arial, sans-serif;
+  color: #1f2937;
+}
+
+#bht-panel.open {
+  display: flex;
+  flex-direction: column;
+  animation: bhtSlide .25s ease-out;
+}
+
+@keyframes bhtSlide {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+#bht-panel .bht-header {
+  background: linear-gradient(135deg, #0066cc 0%, #007aff 100%);
+  color: #fff;
+  padding: 14px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 16px;
+}
+
+#bht-panel .bht-close {
+  background: transparent;
+  color: #fff;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0 8px;
+  line-height: 1;
+}
+
+#bht-panel .bht-body {
+  padding: 16px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+#bht-panel .bht-stats {
+  background: #f0f9ff;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  margin-bottom: 14px;
+  border: 1px solid #bae6fd;
+}
+
+#bht-panel .bht-mini {
+  font-size: 11px;
+  color: #6b7280;
+  margin-top: 2px;
+}
+
+#bht-panel .bht-err {
+  color: #dc2626;
+}
+
+#bht-panel .bht-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+#bht-panel .bht-btn {
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 12px 14px;
+  text-align: right;
+  cursor: pointer;
+  font-size: 14px;
+  color: #1f2937;
+  transition: background .15s, border-color .15s;
+  font-family: inherit;
+}
+
+#bht-panel .bht-btn:hover {
+  background: #e0f2fe;
+  border-color: #0066cc;
+}
+
+#bht-panel .bht-btn.bht-link {
+  background: #0066cc;
+  color: #fff;
+  border-color: #0066cc;
+  margin-top: 8px;
+}
+
+#bht-panel .bht-btn.bht-link:hover {
+  background: #0052a3;
+}
+
+#bht-panel .bht-section {
+  margin-top: 14px;
+  font-size: 13px;
+}

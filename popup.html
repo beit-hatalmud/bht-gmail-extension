@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+<meta charset="utf-8">
+<title>מעקב התנהגות</title>
+<style>
+body { font-family: 'Heebo', Arial, sans-serif; margin: 0; padding: 14px; width: 280px; direction: rtl; color: #1f2937; }
+h3 { margin: 0 0 12px; color: #0066cc; font-size: 16px; }
+.btn { display: block; width: 100%; padding: 10px; margin-bottom: 6px; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 6px; text-align: right; cursor: pointer; font-size: 13px; color: #1f2937; }
+.btn:hover { background: #e0f2fe; border-color: #0066cc; }
+.btn.primary { background: #0066cc; color: #fff; border-color: #0066cc; }
+.btn.primary:hover { background: #0052a3; }
+.status { background: #f0f9ff; padding: 8px; border-radius: 6px; font-size: 12px; margin-bottom: 10px; border: 1px solid #bae6fd; }
+</style>
+</head>
+<body>
+<h3>🎓 מעקב התנהגות - בית התלמוד</h3>
+<div class="status" id="status">בודק חיבור...</div>
+<button class="btn primary" id="open-site">פתח את האתר המלא</button>
+<button class="btn" id="behavior">מעקב התנהגות</button>
+<button class="btn" id="forms">חתימות הורים</button>
+<button class="btn" id="tasks">משימות</button>
+<button class="btn" id="card">כרטיס תלמיד</button>
+<button class="btn" id="phone-info">קו טלפוני /8</button>
+<script>
+const SITE = 'https://beit-hatalmud.github.io/cheder-bht/';
+const APPS = 'https://script.google.com/macros/s/AKfycbzhRqTLE4fjjDqrH1we-JlGZ15R-ws8b_gfWF1xF1ewailaiyiS_YXqUhRtb3cQghVt/exec';
+const TOKEN = 'BHT_AGENT_2026';
+
+document.getElementById('open-site').onclick = () => chrome.tabs.create({ url: SITE });
+document.getElementById('behavior').onclick = () => chrome.tabs.create({ url: SITE + '#behavior' });
+document.getElementById('forms').onclick = () => { chrome.tabs.create({ url: SITE + '#behavior' }); sessionStorage.setItem('behavior_tab','forms'); };
+document.getElementById('tasks').onclick = () => { chrome.tabs.create({ url: SITE + '#behavior' }); sessionStorage.setItem('behavior_tab','tasks'); };
+document.getElementById('card').onclick = () => { chrome.tabs.create({ url: SITE + '#behavior' }); sessionStorage.setItem('behavior_tab','card'); };
+document.getElementById('phone-info').onclick = () => alert('קו /8 - מעקב התנהגות:\\n1 = הקלטת אירוע (זיהוי לפי טלפון + Gemini)\\n2 = השמעת 5 אירועים אחרונים\\n3 = משימות פתוחות\\n4 = חתימות בהמתנה');
+
+(async function() {
+  try {
+    const r = await fetch(APPS + '?action=ping&token=' + TOKEN);
+    const d = await r.json();
+    document.getElementById('status').innerHTML = '✓ מחובר<br><span style="color:#6b7280;font-size:11px">' + new Date(d.time).toLocaleString('he-IL') + '</span>';
+  } catch (e) {
+    document.getElementById('status').innerHTML = '<span style="color:#dc2626">✗ שגיאת חיבור</span>';
+  }
+})();
+</script>
+</body>
+</html>
