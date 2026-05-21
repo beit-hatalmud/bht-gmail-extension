@@ -80,6 +80,44 @@
   font-family: inherit;
 }
 
+#bht-panel .bht-login-card {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+#bht-panel .bht-login-card input {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 13px;
+  direction: rtl;
+  font-family: inherit;
+  background: #fff;
+}
+#bht-panel .bht-login-card input:focus { border-color: #0066cc; outline: none; }
+#bht-panel .bht-pw-row {
+  display: flex;
+  gap: 4px;
+  align-items: stretch;
+}
+#bht-panel .bht-pw-row input { flex: 1; }
+#bht-panel .bht-eye {
+  background: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  padding: 0 8px;
+  cursor: pointer;
+  font-size: 14px;
+  min-width: 36px;
+}
+#bht-panel .bht-eye:hover { background: #f3f4f6; }
+
 #bht-panel .bht-btn-small:hover {
   background: #fde68a;
 }

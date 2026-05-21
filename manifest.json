@@ -3,7 +3,7 @@
   "name": "מעקב התנהגות - בית התלמוד",
   "version": "1.0.0",
   "description": "תוסף צף ל-Gmail לניהול מעקב התנהגות, חתימות הורים ומשימות מתוך הדואר.",
-  "permissions": ["storage", "activeTab", "scripting"],
+  "permissions": ["storage", "activeTab", "scripting", "tabs"],
   "host_permissions": [
     "https://mail.google.com/*",
     "https://script.google.com/*",

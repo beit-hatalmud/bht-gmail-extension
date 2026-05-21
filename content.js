@@ -1,6 +1,4 @@
-// Floating panel inside Gmail. Two modes:
-//  - mini (default): 280px panel with status + quick links + selected-text capture
-//  - full: 95vh iframe with the entire cheder-bht site
+// Always-visible floating panel in Gmail with login form + iframe.
 (function() {
   if (window.__bhtFabInjected) return;
   window.__bhtFabInjected = true;
@@ -8,9 +6,6 @@
   const APPS_SCRIPT = 'https://script.google.com/macros/s/AKfycbzhRqTLE4fjjDqrH1we-JlGZ15R-ws8b_gfWF1xF1ewailaiyiS_YXqUhRtb3cQghVt/exec';
   const TOKEN = 'BHT_AGENT_2026';
   const SITE = 'https://beit-hatalmud.github.io/cheder-bht/';
-  const REFRESH_INTERVAL = 60 * 1000;
-  const MIN_KEY = 'bht_panel_minimized';
-  const MODE_KEY = 'bht_panel_mode';  // 'mini' or 'full'
 
   const container = document.createElement('div');
   container.id = 'bht-container';
@@ -26,26 +21,33 @@
       </div>
       <div class="bht-body bht-mini-body">
         <div class="bht-stats" id="bht-stats"><div class="bht-loading"><span class="spinner"></span> טוען...</div></div>
-        <div class="bht-selected-block" id="bht-sel-block" style="display:none">
-          <div class="bht-mini">📋 נבחר טקסט מהמייל:</div>
-          <div class="bht-selected" id="bht-sel"></div>
-          <div class="bht-sel-actions">
-            <button class="bht-btn-small" data-action="new-event-with-text">+ אירוע מהטקסט</button>
-            <button class="bht-btn-small" data-action="new-task-with-text">+ משימה מהטקסט</button>
-            <button class="bht-btn-small" data-action="copy-text">העתק</button>
+
+        <div class="bht-login-card" id="bht-login-card">
+          <div class="bht-mini">🔑 חיבור אוטומטי לאתר</div>
+          <input type="text" id="bht-username" placeholder="שם משתמש" autocomplete="username">
+          <div class="bht-pw-row">
+            <input type="password" id="bht-password" placeholder="סיסמה" autocomplete="current-password">
+            <button class="bht-eye" id="bht-toggle-pw" title="הצג/הסתר">👁</button>
           </div>
+          <div class="bht-sel-actions">
+            <button class="bht-btn-small" id="bht-save-creds">שמור</button>
+            <button class="bht-btn-small" id="bht-clear-creds">נקה</button>
+          </div>
+          <div class="bht-mini" id="bht-creds-status">לא נשמרו פרטים</div>
         </div>
+
         <div class="bht-actions">
-          <button class="bht-btn" data-action="full">🎯 הרחב לאתר המלא</button>
-          <button class="bht-btn" data-action="behavior">📋 אירועים</button>
+          <button class="bht-btn" data-action="full">🎯 פתח את האתר כאן</button>
+          <button class="bht-btn" data-action="events">📋 אירועים</button>
           <button class="bht-btn" data-action="tasks">✅ משימות</button>
+          <button class="bht-btn" data-action="projects">📊 פרויקטים</button>
           <button class="bht-btn" data-action="forms">📝 חתימות הורים</button>
           <button class="bht-btn" data-action="card">👤 כרטיס תלמיד</button>
           <button class="bht-btn bht-link" data-action="open-tab">🌐 פתח בלשונית חדשה</button>
         </div>
       </div>
       <div class="bht-body bht-full-body" style="display:none">
-        <iframe id="bht-iframe" src="about:blank" style="width:100%;height:100%;border:0;border-radius:0 0 14px 14px"></iframe>
+        <iframe id="bht-iframe" src="about:blank"></iframe>
       </div>
     </div>
     <button id="bht-fab" title="פתח מעקב התנהגות">🎓</button>
@@ -57,11 +59,18 @@
   const iframe = container.querySelector('#bht-iframe');
   const miniBody = container.querySelector('.bht-mini-body');
   const fullBody = container.querySelector('.bht-full-body');
+  const userIn = container.querySelector('#bht-username');
+  const passIn = container.querySelector('#bht-password');
 
   fab.addEventListener('click', () => setMin(false));
   container.querySelector('.bht-minimize').addEventListener('click', () => setMin(true));
-  container.querySelector('.bht-refresh').addEventListener('click', refresh);
-  container.querySelector('.bht-mode').addEventListener('click', toggleMode);
+  container.querySelector('.bht-refresh').addEventListener('click', () => { refresh(); reloadIframe(); });
+  container.querySelector('.bht-mode').addEventListener('click', () => setMode(panel.classList.contains('full') ? 'mini' : 'full'));
+  container.querySelector('#bht-toggle-pw').addEventListener('click', () => {
+    passIn.type = passIn.type === 'password' ? 'text' : 'password';
+  });
+  container.querySelector('#bht-save-creds').addEventListener('click', saveCreds);
+  container.querySelector('#bht-clear-creds').addEventListener('click', clearCreds);
   container.querySelectorAll('[data-action]').forEach(btn => {
     btn.addEventListener('click', () => handleAction(btn.dataset.action));
   });
@@ -69,79 +78,112 @@
   function setMin(min) {
     panel.classList.toggle('minimized', min);
     fab.classList.toggle('show', min);
-    try { localStorage.setItem(MIN_KEY, min ? '1' : '0'); } catch(_) {}
+    chrome.storage.local.set({ bht_min: min });
   }
-
   function setMode(mode) {
     panel.classList.toggle('full', mode === 'full');
-    miniBody.style.display = mode === 'full' ? 'none' : 'block';
-    fullBody.style.display = mode === 'full' ? 'block' : 'none';
-    if (mode === 'full' && iframe.src === 'about:blank') iframe.src = SITE + '#behavior';
-    try { localStorage.setItem(MODE_KEY, mode); } catch(_) {}
+    if (mode === 'full' && iframe.src === 'about:blank') reloadIframe();
+    chrome.storage.local.set({ bht_mode: mode });
+  }
+  function reloadIframe() {
+    iframe.src = buildIframeUrl();
+  }
+  function buildIframeUrl() {
+    return new Promise((resolve) => {
+      chrome.storage.local.get(['bht_user', 'bht_pass', 'bht_tab'], data => {
+        const tab = data.bht_tab || 'events';
+        let url = SITE + '#behavior';
+        if (data.bht_user && data.bht_pass) {
+          url += '?u=' + encodeURIComponent(data.bht_user) + '&p=' + encodeURIComponent(btoa(data.bht_pass));
+        }
+        resolve(url);
+      });
+    });
+  }
+  // Synchronous version returns URL based on cached values
+  let _cachedUser = '', _cachedPass = '', _cachedTab = 'events';
+
+  function rebuildIframeUrl() {
+    let url = SITE + '#behavior';
+    if (_cachedUser && _cachedPass) {
+      url = SITE + '?u=' + encodeURIComponent(_cachedUser) + '&p=' + encodeURIComponent(btoa(_cachedPass)) + '#behavior';
+    }
+    return url;
   }
 
-  function toggleMode() {
-    const cur = panel.classList.contains('full') ? 'full' : 'mini';
-    setMode(cur === 'full' ? 'mini' : 'full');
+  function reloadIframe() {
+    iframe.src = rebuildIframeUrl();
   }
 
-  // Restore state
-  let initMin = false, initMode = 'mini';
-  try { initMin = localStorage.getItem(MIN_KEY) === '1'; } catch(_) {}
-  try { initMode = localStorage.getItem(MODE_KEY) || 'mini'; } catch(_) {}
-  setMin(initMin);
-  setMode(initMode);
+  function loadStored() {
+    chrome.storage.local.get(['bht_user', 'bht_pass', 'bht_min', 'bht_mode', 'bht_tab'], data => {
+      if (data.bht_user) { userIn.value = data.bht_user; _cachedUser = data.bht_user; }
+      if (data.bht_pass) { passIn.value = data.bht_pass; _cachedPass = data.bht_pass; }
+      _cachedTab = data.bht_tab || 'events';
+      updateCredsStatus();
+      setMin(!!data.bht_min);
+      setMode(data.bht_mode || 'mini');
+    });
+  }
+
+  function saveCreds() {
+    _cachedUser = userIn.value.trim();
+    _cachedPass = passIn.value;
+    chrome.storage.local.set({ bht_user: _cachedUser, bht_pass: _cachedPass }, updateCredsStatus);
+    flash('✓ נשמר');
+  }
+  function clearCreds() {
+    _cachedUser = ''; _cachedPass = '';
+    userIn.value = ''; passIn.value = '';
+    chrome.storage.local.remove(['bht_user', 'bht_pass'], updateCredsStatus);
+  }
+  function updateCredsStatus() {
+    const el = container.querySelector('#bht-creds-status');
+    if (_cachedUser && _cachedPass) {
+      el.textContent = `✓ נשמר: ${_cachedUser}`;
+      el.style.color = '#16a34a';
+    } else {
+      el.textContent = 'לא נשמרו פרטים';
+      el.style.color = '#6b7280';
+    }
+  }
+
+  // Auto-save on change (debounced)
+  let saveTimer = null;
+  [userIn, passIn].forEach(el => {
+    el.addEventListener('input', () => {
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(saveCreds, 600);
+    });
+  });
 
   let lastSelection = '';
-  // Track selected text in Gmail
   document.addEventListener('selectionchange', () => {
     const sel = window.getSelection ? window.getSelection().toString().trim() : '';
-    if (sel && sel !== lastSelection && sel.length < 500) {
-      lastSelection = sel;
-      const block = container.querySelector('#bht-sel-block');
-      container.querySelector('#bht-sel').textContent = sel.length > 80 ? sel.substring(0, 80) + '…' : sel;
-      block.style.display = 'block';
-    }
+    if (sel && sel.length > 5 && sel.length < 500) lastSelection = sel;
   });
 
   function handleAction(action) {
-    if (action === 'full') return setMode('full');
     if (action === 'open-tab') { window.open(SITE, '_blank'); return; }
-    const hash = '#behavior';
-    const tabMap = { 'tasks': 'tasks', 'forms': 'forms', 'card': 'card' };
+    if (action === 'full') { setMode('full'); reloadIframe(); return; }
+    const tabMap = { 'events':'events', 'tasks':'tasks', 'forms':'forms', 'card':'card', 'projects':'projects' };
     if (tabMap[action]) {
-      try { localStorage.setItem('behavior_tab', tabMap[action]); } catch(_) {}
+      _cachedTab = tabMap[action];
+      chrome.storage.local.set({ bht_tab: _cachedTab });
     }
-    if (action === 'copy-text') {
-      navigator.clipboard.writeText(lastSelection || '').then(() =>
-        flashStatus('✓ הועתק ל-clipboard'));
-      return;
-    }
-    if (action === 'new-event-with-text' || action === 'new-task-with-text') {
-      // Open full site with selected text in localStorage for behavior.js to pick up
-      try {
-        localStorage.setItem('bht_inject_text', lastSelection);
-        localStorage.setItem('bht_inject_target', action === 'new-event-with-text' ? 'event' : 'task');
-      } catch(_) {}
-      setMode('full');
-      if (iframe.src === 'about:blank' || !iframe.src.includes('#behavior')) {
-        iframe.src = SITE + hash;
-      } else {
-        // Already loaded — reload to trigger
-        iframe.contentWindow.postMessage({ bht: true, type: 'inject', text: lastSelection, target: action }, '*');
-      }
-      return;
-    }
-    // Default: open in inline iframe
     setMode('full');
-    if (iframe.src === 'about:blank' || !iframe.src.includes(hash)) iframe.src = SITE + hash;
+    reloadIframe();
+    // After iframe loads, try to set tab via postMessage
+    setTimeout(() => {
+      try { iframe.contentWindow.postMessage({ bht: true, tab: tabMap[action] }, '*'); } catch(_) {}
+    }, 1500);
   }
 
-  function flashStatus(msg) {
+  function flash(msg) {
     const stats = container.querySelector('#bht-stats');
     const orig = stats.innerHTML;
     stats.innerHTML = `<div class="bht-ok">${msg}</div>`;
-    setTimeout(() => { stats.innerHTML = orig; }, 1500);
+    setTimeout(() => { stats.innerHTML = orig; }, 1200);
   }
 
   async function refresh() {
@@ -160,6 +202,7 @@
     }
   }
 
+  loadStored();
   refresh();
-  setInterval(refresh, REFRESH_INTERVAL);
+  setInterval(refresh, 60000);
 })();
