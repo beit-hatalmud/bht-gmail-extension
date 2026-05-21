@@ -104,9 +104,11 @@
   let _cachedUser = '', _cachedPass = '', _cachedTab = 'events';
 
   function rebuildIframeUrl() {
-    let url = SITE + '#behavior';
+    // Cache-bust so we always get the latest behavior-projects.js / behavior-tasks.js
+    const cb = '_t=' + Date.now();
+    let url = SITE + '?' + cb + '#behavior';
     if (_cachedUser && _cachedPass) {
-      url = SITE + '?u=' + encodeURIComponent(_cachedUser) + '&p=' + encodeURIComponent(btoa(_cachedPass)) + '#behavior';
+      url = SITE + '?u=' + encodeURIComponent(_cachedUser) + '&p=' + encodeURIComponent(btoa(_cachedPass)) + '&' + cb + '#behavior';
     }
     return url;
   }
