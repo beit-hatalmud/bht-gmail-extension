@@ -11,6 +11,8 @@ h3 { margin: 0 0 12px; color: #0066cc; font-size: 16px; }
 .btn.primary { background: #0066cc; color: #fff; border-color: #0066cc; }
 .btn.primary:hover { background: #0052a3; }
 .status { background: #f0f9ff; padding: 8px; border-radius: 6px; font-size: 12px; margin-bottom: 10px; border: 1px solid #bae6fd; }
+.mini { color: #6b7280; font-size: 11px; }
+.err { color: #dc2626; }
 </style>
 </head>
 <body>
@@ -22,27 +24,6 @@ h3 { margin: 0 0 12px; color: #0066cc; font-size: 16px; }
 <button class="btn" id="tasks">משימות</button>
 <button class="btn" id="card">כרטיס תלמיד</button>
 <button class="btn" id="phone-info">קו טלפוני /8</button>
-<script>
-const SITE = 'https://beit-hatalmud.github.io/cheder-bht/';
-const APPS = 'https://script.google.com/macros/s/AKfycbzhRqTLE4fjjDqrH1we-JlGZ15R-ws8b_gfWF1xF1ewailaiyiS_YXqUhRtb3cQghVt/exec';
-const TOKEN = 'BHT_AGENT_2026';
-
-document.getElementById('open-site').onclick = () => chrome.tabs.create({ url: SITE });
-document.getElementById('behavior').onclick = () => chrome.tabs.create({ url: SITE + '#behavior' });
-document.getElementById('forms').onclick = () => { chrome.tabs.create({ url: SITE + '#behavior' }); sessionStorage.setItem('behavior_tab','forms'); };
-document.getElementById('tasks').onclick = () => { chrome.tabs.create({ url: SITE + '#behavior' }); sessionStorage.setItem('behavior_tab','tasks'); };
-document.getElementById('card').onclick = () => { chrome.tabs.create({ url: SITE + '#behavior' }); sessionStorage.setItem('behavior_tab','card'); };
-document.getElementById('phone-info').onclick = () => alert('קו /8 - מעקב התנהגות:\\n1 = הקלטת אירוע (זיהוי לפי טלפון + Gemini)\\n2 = השמעת 5 אירועים אחרונים\\n3 = משימות פתוחות\\n4 = חתימות בהמתנה');
-
-(async function() {
-  try {
-    const r = await fetch(APPS + '?action=ping&token=' + TOKEN);
-    const d = await r.json();
-    document.getElementById('status').innerHTML = '✓ מחובר<br><span style="color:#6b7280;font-size:11px">' + new Date(d.time).toLocaleString('he-IL') + '</span>';
-  } catch (e) {
-    document.getElementById('status').innerHTML = '<span style="color:#dc2626">✗ שגיאת חיבור</span>';
-  }
-})();
-</script>
+<script src="popup.js"></script>
 </body>
 </html>
