@@ -2,85 +2,175 @@
 <html dir="rtl" lang="he">
 <head>
 <meta charset="utf-8">
-<title>מעקב התנהגות</title>
+<title>מערכת בית התלמוד</title>
 <style>
-* { box-sizing: border-box; }
-html, body { margin: 0; padding: 0; }
-body {
-  font-family: 'Heebo', Arial, sans-serif;
-  direction: rtl;
-  color: #1f2937;
-  width: 760px;
-  height: 580px;
-  display: flex;
-  flex-direction: column;
-}
-.topbar {
-  background: linear-gradient(135deg, #0066cc 0%, #007aff 100%);
-  color: #fff;
-  padding: 8px 12px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-}
-.topbar h3 { margin: 0; font-size: 14px; font-weight: 600; }
-.tabs { display: flex; gap: 4px; }
-.tab {
-  background: rgba(255,255,255,0.15);
-  color: #fff;
-  border: 0;
-  padding: 5px 10px;
-  border-radius: 5px;
-  font-size: 12px;
-  cursor: pointer;
-  font-family: inherit;
-}
-.tab:hover { background: rgba(255,255,255,0.3); }
-.tab.active { background: #fff; color: #0066cc; font-weight: 600; }
-.actions { display: flex; gap: 4px; }
-.action-btn {
-  background: rgba(255,255,255,0.15);
-  color: #fff;
-  border: 0;
-  padding: 5px 8px;
-  border-radius: 5px;
-  font-size: 11px;
-  cursor: pointer;
-  font-family: inherit;
-}
-.action-btn:hover { background: rgba(255,255,255,0.3); }
-.status {
-  padding: 4px 12px;
-  background: #f0f9ff;
-  border-bottom: 1px solid #bae6fd;
-  font-size: 11px;
-  color: #075985;
-}
-.status.err { background: #fef2f2; color: #dc2626; border-color: #fecaca; }
-#frame {
-  flex: 1;
-  border: 0;
-  width: 100%;
-}
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Heebo', Arial, sans-serif;
+    direction: rtl;
+    color: #1f2937;
+    width: 800px;
+    height: 620px;
+    display: flex;
+    flex-direction: column;
+    background: #f8fafc;
+  }
+  .topbar {
+    background: linear-gradient(135deg, #1e3a8a, #2563eb 50%, #7c3aed);
+    color: #fff;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  }
+  .topbar h3 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .nav-wrap {
+    flex: 1;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    padding: 2px 0;
+    scrollbar-width: thin;
+  }
+  .nav-wrap::-webkit-scrollbar { height: 4px; }
+  .nav-wrap::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 2px; }
+  .tab {
+    display: inline-block;
+    background: rgba(255,255,255,0.12);
+    color: #fff;
+    border: 0;
+    padding: 5px 10px;
+    border-radius: 16px;
+    font-size: 11px;
+    cursor: pointer;
+    font-family: inherit;
+    margin-left: 4px;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .tab:hover { background: rgba(255,255,255,0.25); transform: translateY(-1px); }
+  .tab.active {
+    background: #fff;
+    color: #1e3a8a;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  .quick-actions {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .action-btn {
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+    border: 0;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    font-size: 14px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .action-btn:hover { background: rgba(255,255,255,0.3); transform: scale(1.1); }
+  .status-bar {
+    padding: 4px 12px;
+    background: #ecfdf5;
+    border-bottom: 1px solid #a7f3d0;
+    font-size: 11px;
+    color: #064e3b;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .status-bar.err { background: #fef2f2; color: #991b1b; border-color: #fecaca; }
+  .status-bar.warn { background: #fffbeb; color: #92400e; border-color: #fcd34d; }
+  #frame {
+    flex: 1;
+    border: 0;
+    width: 100%;
+    background: #fff;
+  }
+  #loader {
+    position: absolute;
+    top: 60px; left: 0; right: 0; bottom: 0;
+    background: rgba(255,255,255,0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #2563eb;
+    font-size: 14px;
+    z-index: 10;
+    transition: opacity 0.3s;
+  }
+  #loader.hidden { opacity: 0; pointer-events: none; }
+  .spinner {
+    width: 24px;
+    height: 24px;
+    border: 3px solid #e5e7eb;
+    border-top: 3px solid #2563eb;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-left: 8px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .tab-emoji { margin-left: 3px; }
 </style>
 </head>
 <body>
+
 <div class="topbar">
-  <h3>🎓 מעקב התנהגות</h3>
-  <div class="tabs">
-    <button class="tab" data-tab="events">📋 אירועים</button>
-    <button class="tab" data-tab="forms">📝 חתימות</button>
-    <button class="tab" data-tab="tasks">✅ משימות</button>
-    <button class="tab" data-tab="card">👤 כרטיס תלמיד</button>
+  <h3>🎓 בית התלמוד</h3>
+  <div class="nav-wrap" id="nav">
+    <button class="tab" data-page="home"><span class="tab-emoji">🏠</span>בית</button>
+    <button class="tab" data-page="students"><span class="tab-emoji">👨‍🎓</span>תלמידים</button>
+    <button class="tab" data-page="behavior"><span class="tab-emoji">📋</span>התנהגות</button>
+    <button class="tab" data-page="writing"><span class="tab-emoji">✏️</span>כתיבה</button>
+    <button class="tab" data-page="reading"><span class="tab-emoji">📖</span>קריאה</button>
+    <button class="tab" data-page="lessonsKlein"><span class="tab-emoji">🎓</span>פרטני</button>
+    <button class="tab" data-page="tasks"><span class="tab-emoji">✅</span>משימות</button>
+    <button class="tab" data-page="projects"><span class="tab-emoji">📊</span>פרויקטים</button>
+    <button class="tab" data-page="formsMgmt"><span class="tab-emoji">📝</span>טפסים</button>
+    <button class="tab" data-page="staff"><span class="tab-emoji">👥</span>צוות</button>
+    <button class="tab" data-page="attendance"><span class="tab-emoji">📅</span>נוכחות</button>
+    <button class="tab" data-page="functioning"><span class="tab-emoji">⭐</span>תפקוד</button>
+    <button class="tab" data-page="tests"><span class="tab-emoji">📝</span>מבחנים</button>
+    <button class="tab" data-page="medications"><span class="tab-emoji">💊</span>רפואי</button>
+    <button class="tab" data-page="meetings"><span class="tab-emoji">🤝</span>אסיפות</button>
+    <button class="tab" data-page="conversations"><span class="tab-emoji">💬</span>שיחות</button>
+    <button class="tab" data-page="classview"><span class="tab-emoji">🏫</span>כיתה</button>
+    <button class="tab" data-page="calendar"><span class="tab-emoji">📆</span>יומן</button>
+    <button class="tab" data-page="reports"><span class="tab-emoji">📊</span>דוחות</button>
+    <button class="tab" data-page="settings"><span class="tab-emoji">⚙️</span>הגדרות</button>
   </div>
-  <div class="actions">
+  <div class="quick-actions">
     <button class="action-btn" id="refresh" title="רענן">⟳</button>
-    <button class="action-btn" id="open-tab" title="פתח בלשונית חדשה">🌐</button>
+    <button class="action-btn" id="back" title="חזור">←</button>
+    <button class="action-btn" id="open-tab" title="פתח בלשונית">🌐</button>
+    <button class="action-btn" id="maximize" title="הגדל">⤢</button>
   </div>
 </div>
-<div class="status" id="status">בודק חיבור...</div>
-<iframe id="frame" src="about:blank"></iframe>
+
+<div class="status-bar" id="status">
+  <span id="status-text">בודק חיבור...</span>
+  <span id="user-info"></span>
+</div>
+
+<div style="position:relative;flex:1;display:flex">
+  <div id="loader"><div class="spinner"></div>טוען...</div>
+  <iframe id="frame" src="about:blank"></iframe>
+</div>
+
 <script src="popup.js"></script>
 </body>
 </html>
